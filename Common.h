@@ -1,4 +1,4 @@
-//#define UNRESTRICTED_AVAILABILITY
+#define UNRESTRICTED_AVAILABILITY
 #import "../PS.h"
 
 @interface CAMElapsedTimeView (Addition)

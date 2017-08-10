@@ -1,9 +1,10 @@
+TARGET = iphone:clang:9.0:8.0
+
 include $(THEOS)/makefiles/common.mk
 
 LIBRARY_NAME = RecordPauseiOS8
 RecordPauseiOS8_FILES = Tweak.xm
-RecordPauseiOS8_FRAMEWORKS = CoreGraphics UIKit
-RecordPauseiOS8_LIBRARIES = substrate
-RecordPauseiOS8_INSTALL_PATH = /Library/Application Support/RecordPause
+RecordPauseiOS8_EXTRA_FRAMEWORKS = CydiaSubstrate
+RecordPauseiOS8_INSTALL_PATH = /Library/MobileSubstrate/DynamicLibraries/RecordPause
 
 include $(THEOS_MAKE_PATH)/library.mk

@@ -1,10 +1,5 @@
-DEBUG = 0
-PACKAGE_VERSION = 1.2.2
-
-ifeq ($(SIMULATOR),1)
-	TARGET = simulator:clang:latest
-	ARCHS = x86_64 i386
-endif
+PACKAGE_VERSION = 1.2.3
+TARGET = iphone:clang:latest:8.0
 
 include $(THEOS)/makefiles/common.mk
 
@@ -22,11 +17,3 @@ internal-stage::
 	$(ECHO_NOTHING)mkdir -p $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences$(ECHO_END)
 	$(ECHO_NOTHING)cp -R Resources $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences/RecordPause$(ECHO_END)
 	$(ECHO_NOTHING)find $(THEOS_STAGING_DIR) -name .DS_Store | xargs rm -rf$(ECHO_END)
-
-SIM_TARGET = RecordPauseiOS910
-all::
-ifeq ($(SIMULATOR),1)
-	@rm -f /opt/simject/$(SIM_TARGET).dylib
-	@cp -v $(THEOS_OBJ_DIR)/$(SIM_TARGET).dylib /opt/simject
-	@cp -v $(PWD)/$(TWEAK_NAME).plist /opt/simject/$(SIM_TARGET).plist
-endif

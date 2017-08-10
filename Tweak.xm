@@ -20,8 +20,8 @@ static void post(CFNotificationCenterRef center, void *observer, CFStringRef nam
     reloadSettings();
     if (tweakEnabled) {
         if (isiOS9Up)
-            dlopen("/Library/Application Support/RecordPause/RecordPauseiOS910.dylib", RTLD_LAZY);
+            dlopen("/Library/MobileSubstrate/DynamicLibraries/RecordPause/RecordPauseiOS910.dylib", RTLD_LAZY);
         else
-            dlopen("/Library/Application Support/RecordPause/RecordPauseiOS8.dylib", RTLD_LAZY);
+            dlopen("/Library/MobileSubstrate/DynamicLibraries/RecordPause/RecordPauseiOS8.dylib", RTLD_LAZY);
     }
 }

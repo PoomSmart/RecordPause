@@ -1,12 +1,16 @@
 #define TWEAK
-#import "../../PS.h"
 #import "../Common.h"
+#import <UIKit/UIColor+Private.h>
+#import <UIKit/UIImage+Private.h>
+
+@interface CAMCameraView (Addition)
+@property(retain, nonatomic) UILongPressGestureRecognizer *rpGesture;
+@end
 
 %hook CAMElapsedTimeView
 
 %new
-- (void)pauseTimer
-{
+- (void)pauseTimer {
     NSTimer *timer = [MSHookIvar<NSTimer *>(self, "__updateTimer")retain];
     objc_setAssociatedObject(timer, (__bridge const void *)(NSTimerPauseDate), [NSDate date], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(timer, (__bridge const void *)(NSTimerPreviousFireDate), timer.fireDate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -14,8 +18,7 @@
 }
 
 %new
-- (void)resumeTimer
-{
+- (void)resumeTimer {
     NSTimer *timer = [MSHookIvar<NSTimer *>(self, "__updateTimer")retain];
     NSDate *pauseDate = objc_getAssociatedObject(timer, (__bridge const void *)NSTimerPauseDate);
     NSDate *previousFireDate = objc_getAssociatedObject(timer, (__bridge const void *)NSTimerPreviousFireDate);
@@ -26,8 +29,7 @@
 }
 
 %new
-- (void)updateUI: (BOOL)pause
-{
+- (void)updateUI: (BOOL)pause {
     self._timeLabel.textColor = pause ? UIColor.systemYellowColor : UIColor.whiteColor;
     self._recordingImageView.image = [self._recordingImageView.image _flatImageWithColor:pause ? UIColor.systemYellowColor : UIColor.redColor];
 }
@@ -98,8 +100,7 @@
 
 %end
 
-%ctor
-{
+%ctor {
     openCamera8();
     reloadSettings2();
     %init;

@@ -1,12 +1,16 @@
 #define TWEAK
-#import "../../PS.h"
 #import "../Common.h"
+#import <UIKit/UIColor+Private.h>
+#import <UIKit/UIImage+Private.h>
+
+@interface CAMViewfinderViewController (Addition)
+@property(retain, nonatomic) UILongPressGestureRecognizer *rpGesture;
+@end
 
 %hook CAMElapsedTimeView
 
 %new
-- (void)pauseTimer
-{
+- (void)pauseTimer {
     NSTimer *timer = [MSHookIvar<NSTimer *>(self, "__updateTimer")retain];
     if (timer == nil)
         return;
@@ -17,8 +21,7 @@
 }
 
 %new
-- (void)resumeTimer
-{
+- (void)resumeTimer {
     NSTimer *timer = [MSHookIvar<NSTimer *>(self, "__updateTimer")retain];
     NSDate *pauseDate = objc_getAssociatedObject(timer, (__bridge const void *)NSTimerPauseDate);
     NSDate *previousFireDate = objc_getAssociatedObject(timer, (__bridge const void *)NSTimerPreviousFireDate);
@@ -30,8 +33,7 @@
 }
 
 %new
-- (void)updateUI: (BOOL)pause
-{
+- (void)updateUI: (BOOL)pause {
     self._timeLabel.textColor = pause ? UIColor.systemYellowColor : UIColor.whiteColor;
     self._recordingImageView.image = [self._recordingImageView.image _flatImageWithColor:pause ? UIColor.systemYellowColor : UIColor.redColor];
 }
@@ -77,7 +79,7 @@
         if (movieOutput == nil)
             return;
         CAMElapsedTimeView *elapsedTimeView = self._elapsedTimeView;
-        CAMShutterButton *shutterButton = self._shutterButton;
+        CUShutterButton *shutterButton = self._shutterButton;
         BOOL pause = ![movieOutput isRecordingPaused];
         [elapsedTimeView updateUI:pause];
         UIColor *shutterColor = pause ? UIColor.systemYellowColor : [shutterButton _colorForMode:shutterButton.mode];
@@ -102,8 +104,7 @@
 
 %end
 
-%ctor
-{
+%ctor {
     openCamera10();
     reloadSettings2();
     %init;

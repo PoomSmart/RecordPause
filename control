@@ -1,7 +1,7 @@
 Package: org.thebigboss.recordpause
 Name: RecordPause
 Depends: mobilesubstrate, preferenceloader, firmware (>= 8.0)
-Version: 1.0
+Version: 1.0.0
 Architecture: iphoneos-arm
 Description: Pause/resume video recording.
 Maintainer: PoomSmart

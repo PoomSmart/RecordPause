@@ -1,5 +1,5 @@
-#import <UIKit/UIKit.h>
-#import <substrate.h>
+//#define UNRESTRICTED_AVAILABILITY
+#import "../PS.h"
 
 @interface CAMElapsedTimeView (Addition)
 - (void)pauseTimer;
@@ -13,14 +13,6 @@
 - (void)resumeRecording;
 @end
 
-@interface CAMViewfinderViewController (Addition)
-@property(retain, nonatomic) UILongPressGestureRecognizer *rpGesture;
-@end
-
-@interface CAMCameraView (Addition)
-@property(retain, nonatomic) UILongPressGestureRecognizer *rpGesture;
-@end
-
 CFStringRef PreferencesNotification = CFSTR("com.PS.RecordPause.prefs");
 NSString *PREF_PATH = @"/var/mobile/Library/Preferences/com.PS.RecordPause.plist";
 
@@ -31,14 +23,10 @@ NSString *NSTimerPreviousFireDate = @"NSTimerPreviousFireDate";
 
 static BOOL dimScreen;
 
-static void reloadSettings2(){
-    #ifdef SIMULATOR
-    dimScreen = YES;
-    #else
+static void reloadSettings2() {
     NSDictionary *prefs = [NSDictionary dictionaryWithContentsOfFile:PREF_PATH];
     id temp = prefs[@"dimScreen"];
     dimScreen = temp ? [temp boolValue] : YES;
-    #endif
 }
 
 #endif

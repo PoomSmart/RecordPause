@@ -1,6 +1,6 @@
-#import "../PS.h"
+#import "../../PS.h"
 #import <dlfcn.h>
-#import "Common.h"
+#import "../Common.h"
 
 static BOOL tweakEnabled;
 
@@ -11,7 +11,7 @@ static void reloadSettings() {
     tweakEnabled = temp ? [temp boolValue] : YES;
 }
 
-static void post(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo){
+static void post(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
     reloadSettings();
 }
 

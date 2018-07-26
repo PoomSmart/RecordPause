@@ -11,7 +11,9 @@
 
 %new
 - (void)pauseTimer {
-    NSTimer *timer = [MSHookIvar<NSTimer *>(self, "__updateTimer")retain];
+    NSTimer *timer = [[self valueForKey:@"__updateTimer"] retain];
+    if (timer == nil)
+        return;
     objc_setAssociatedObject(timer, (__bridge const void *)(NSTimerPauseDate), [NSDate date], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(timer, (__bridge const void *)(NSTimerPreviousFireDate), timer.fireDate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     timer.fireDate = [NSDate distantFuture];
@@ -19,23 +21,24 @@
 
 %new
 - (void)resumeTimer {
-    NSTimer *timer = [MSHookIvar<NSTimer *>(self, "__updateTimer")retain];
+    NSTimer *timer = [[self valueForKey:@"__updateTimer"] retain];
     NSDate *pauseDate = objc_getAssociatedObject(timer, (__bridge const void *)NSTimerPauseDate);
     NSDate *previousFireDate = objc_getAssociatedObject(timer, (__bridge const void *)NSTimerPreviousFireDate);
     const NSTimeInterval pauseTime = -[pauseDate timeIntervalSinceNow];
     timer.fireDate = [NSDate dateWithTimeInterval:pauseTime sinceDate:previousFireDate];
-    NSDate *newStartDate = [NSDate dateWithTimeInterval:pauseTime sinceDate:MSHookIvar < NSDate *> (self, "__startTime")];
-    MSHookIvar<NSDate *>(self, "__startTime") = [newStartDate retain];
+    NSDate *newStartDate = [NSDate dateWithTimeInterval:pauseTime sinceDate:[self valueForKey:@"__startTime"]];
+    [self setValue:[newStartDate retain] forKey:@"__startTime"];
+    [timer release];
 }
 
 %new
-- (void)updateUI: (BOOL)pause {
+- (void)updateUI:(BOOL)pause {
     self._timeLabel.textColor = pause ? UIColor.systemYellowColor : UIColor.whiteColor;
     self._recordingImageView.image = [self._recordingImageView.image _flatImageWithColor:pause ? UIColor.systemYellowColor : UIColor.redColor];
 }
 
 - (void)endTimer {
-    NSTimer *timer = [MSHookIvar<NSTimer *>(self, "__updateTimer")retain];
+    NSTimer *timer = [[self valueForKey:@"__updateTimer"] retain];
     if (timer == nil)
         return;
     objc_setAssociatedObject(timer, (__bridge const void *)(NSTimerPauseDate), nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -54,7 +57,7 @@
     %orig;
     if (self.rpGesture == nil) {
         self.rpGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(rp_togglePlayPause:)];
-        [MSHookIvar<CAMShutterButton *>(self, "__shutterButton") addGestureRecognizer:self.rpGesture];
+        [[self valueForKey:@"__shutterButton"] addGestureRecognizer:self.rpGesture];
     }
 }
 
@@ -64,12 +67,12 @@
 }
 
 %new
-- (void)rp_togglePlayPause: (UILongPressGestureRecognizer *)gesture {
+- (void)rp_togglePlayPause:(UILongPressGestureRecognizer *)gesture {
     if (gesture.state == UIGestureRecognizerStateEnded) {
         CAMCaptureController *camc = (CAMCaptureController *)[NSClassFromString(@"CAMCaptureController") sharedInstance];
         if (![camc isCapturingVideo])
             return;
-        AVCaptureMovieFileOutput *movieOutput = MSHookIvar<AVCaptureMovieFileOutput *>(camc, "_avCaptureOutputVideo");
+        AVCaptureMovieFileOutput *movieOutput = [camc valueForKey:@"_avCaptureOutputVideo"];
         CAMElapsedTimeView *elapsedTimeView = self._elapsedTimeView;
         CAMShutterButton *shutterButton = self._shutterButton;
         BOOL pause = ![movieOutput isRecordingPaused];

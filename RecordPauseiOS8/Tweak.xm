@@ -2,6 +2,11 @@
 #import "../Common.h"
 #import <UIKit/UIColor+Private.h>
 #import <UIKit/UIImage+Private.h>
+#import <Cephei/HBPreferences.h>
+
+HBPreferences *preferences;
+BOOL tweakEnabled;
+BOOL dimScreen;
 
 @interface CAMCameraView (Addition)
 @property(retain, nonatomic) UILongPressGestureRecognizer *rpGesture;
@@ -78,7 +83,7 @@
         BOOL pause = ![movieOutput isRecordingPaused];
         if (dimScreen) {
             CAMPreviewView *previewView = self.previewView;
-            [previewView setDimmingStrength:pause ? 0.3f : 0.0f duration:0.2f];
+            [previewView setDimmingStrength:pause ? 0.3 : 0.0 duration:0.2];
         }
         [elapsedTimeView updateUI:pause];
         UIColor *shutterColor = pause ? UIColor.systemYellowColor : [shutterButton _colorForMode:shutterButton.mode];
@@ -105,6 +110,8 @@
 
 %ctor {
     openCamera8();
-    reloadSettings2();
+    preferences = [[HBPreferences alloc] initWithIdentifier:@"com.PS.RecordPause"];
+    [preferences registerBool:&tweakEnabled default:YES forKey:@"tweakEnabled"];
+    [preferences registerBool:&dimScreen default:YES forKey:@"dimScreen"];
     %init;
 }

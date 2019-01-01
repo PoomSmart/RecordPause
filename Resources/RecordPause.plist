@@ -25,7 +25,7 @@
         	<key>cell</key>
         	<string>PSSwitchCell</string>
         	<key>PostNotification</key>
-        	<string>com.PS.RecordPause.prefs</string>
+        	<string>com.PS.RecordPause/ReloadPrefs</string>
         	<key>default</key>
         	<true/>
         	<key>defaults</key>
@@ -53,7 +53,7 @@
         	<key>cell</key>
         	<string>PSSwitchCell</string>
         	<key>PostNotification</key>
-        	<string>com.PS.RecordPause.prefs</string>
+        	<string>com.PS.RecordPause/ReloadPrefs</string>
         	<key>default</key>
         	<true/>
         	<key>defaults</key>
@@ -77,8 +77,9 @@
         <key>footerAlignment</key>
         <integer>1</integer>
         <key>footerText</key>
-        <string>© 2013 - 2017 Thatchapon Unprasert
-(@PoomSmart)</string>
+        <string>© 2013 - 2017 PoomSmart
+© 2018 Spica T
+</string>
       </dict>
     </array>
   </dict>

@@ -2,6 +2,10 @@
 #import "../Common.h"
 #import <UIKit/UIColor+Private.h>
 #import <UIKit/UIImage+Private.h>
+#import <Cephei/HBPreferences.h>
+
+HBPreferences *preferences;
+BOOL tweakEnabled;
 
 @interface CAMViewfinderViewController (Addition)
 @property(retain, nonatomic) UILongPressGestureRecognizer *rpGesture;
@@ -106,6 +110,7 @@
 
 %ctor {
     openCamera10();
-    reloadSettings2();
+    preferences = [[HBPreferences alloc] initWithIdentifier:@"com.PS.RecordPause"];
+    [preferences registerBool:&tweakEnabled default:YES forKey:@"tweakEnabled"];
     %init;
 }

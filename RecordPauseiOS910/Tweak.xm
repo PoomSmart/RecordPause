@@ -43,6 +43,7 @@ BOOL tweakEnabled;
 }
 
 - (void)endTimer {
+    if (!tweakEnabled) { %orig; return; }
     NSTimer *timer = [[self valueForKey:@"__updateTimer"] retain];
     if (timer == nil)
         return;
@@ -61,7 +62,7 @@ BOOL tweakEnabled;
 
 - (void)_createShutterButtonIfNecessary {
     %orig;
-    if (self.rpGesture == nil) {
+    if (tweakEnabled && self.rpGesture == nil) {
         self.rpGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(rp_togglePlayPause:)];
         [[self valueForKey:@"__shutterButton"] addGestureRecognizer:self.rpGesture];
     }
@@ -69,12 +70,13 @@ BOOL tweakEnabled;
 
 - (void)_setCurrentGraphConfiguration:(CAMCaptureGraphConfiguration *)configuration {
     %orig;
-    self.rpGesture.enabled = configuration.mode == 1 || configuration.mode == 2 || configuration.mode == 6;
+    if (tweakEnabled)
+        self.rpGesture.enabled = configuration.mode == 1 || configuration.mode == 2 || configuration.mode == 6;
 }
 
 %new
 - (void)rp_togglePlayPause:(UILongPressGestureRecognizer *)gesture {
-    if (gesture.state == UIGestureRecognizerStateEnded) {
+    if (tweakEnabled && gesture.state == UIGestureRecognizerStateEnded) {
         CUCaptureController *cuc = [self _captureController];
         if (![cuc isCapturingVideo])
             return;
@@ -100,6 +102,7 @@ BOOL tweakEnabled;
 
 - (void)_createElapsedTimeViewIfNecessary {
     %orig;
+    if (!tweakEnabled) return;
     UITapGestureRecognizer *togglePlayPause = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(rp_togglePlayPause:)];
     togglePlayPause.numberOfTapsRequired = 1;
     [self._elapsedTimeView addGestureRecognizer:togglePlayPause];

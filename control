@@ -1,6 +1,6 @@
 Package: com.spicat.recordpause
-Name: RecordPause
-Depends: mobilesubstrate, preferenceloader, firmware (>= 8.0), ws.hbang.common (>= 1.2)
+Name: RecordPause (iOS 9+)
+Depends: mobilesubstrate, firmware (>= 9.0), ws.hbang.common (>= 1.2)
 Conflicts: org.thebigboss.recordpause
 Version: 1.0.0
 Architecture: iphoneos-arm

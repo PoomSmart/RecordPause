@@ -63,7 +63,7 @@
         backgroundView.tintColor = pause ? UIColor.systemYellowColor : (recording ? defaultColor : UIColor.clearColor);
     } else {
         self._timeLabel.textColor = pause ? UIColor.systemYellowColor : UIColor.whiteColor;
-        if (self._recordingImageView)
+        if ([self respondsToSelector:@selector(_recordingImageView)] && self._recordingImageView)
             self._recordingImageView.image = [self._recordingImageView.image _flatImageWithColor:pause ? UIColor.systemYellowColor : defaultColor];
         if (backgroundView)
             backgroundView.image = [backgroundView.image _flatImageWithColor:pause ? UIColor.systemYellowColor : defaultColor];
@@ -144,7 +144,10 @@
                 shutterControl.overrideShutterButtonColor = YES;
             [shutterControl _updateRendererShapes];
             CAMLiquidShutterRenderer *renderer = [shutterControl valueForKey:@"_liquidShutterRenderer"];
-            [renderer renderIfNecessary];
+            if ([renderer respondsToSelector:@selector(renderIfNecessary)])
+                [renderer renderIfNecessary];
+            else if ([shutterControl respondsToSelector:@selector(_updateRendererShapes)])
+                [shutterControl _updateRendererShapes];
             shutterControl.overrideShutterButtonColor = NO;
         }
         if (pause) {

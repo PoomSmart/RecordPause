@@ -1,19 +1,18 @@
-#define TWEAK
 #import "Common.h"
 #import <UIKit/UIColor+Private.h>
 #import <UIKit/UIImage+Private.h>
 
 @interface CAMViewfinderViewController (Addition)
-@property(retain, nonatomic) UILongPressGestureRecognizer *rpGesture;
+@property (retain, nonatomic) UILongPressGestureRecognizer *rpGesture;
 @end
 
 @interface CAMDynamicShutterControl (Addition)
-@property(assign) BOOL overrideShutterButtonColor;
+@property (assign) BOOL overrideShutterButtonColor;
 @end
 
 %hook CAMDynamicShutterControl
 
-%property(assign) BOOL overrideShutterButtonColor;
+%property (assign) BOOL overrideShutterButtonColor;
 
 - (CAMShutterColor)_innerShapeColor {
     CAMShutterColor color = %orig;
@@ -33,25 +32,23 @@
 
 %new
 - (void)pauseTimer {
-    NSTimer *timer = [[self valueForKey:@"__updateTimer"] retain];
+    NSTimer *timer = [self valueForKey:@"__updateTimer"];
     if (timer == nil)
         return;
     objc_setAssociatedObject(timer, (__bridge const void *)(NSTimerPauseDate), [NSDate date], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(timer, (__bridge const void *)(NSTimerPreviousFireDate), timer.fireDate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     timer.fireDate = [NSDate distantFuture];
-    [timer release];
 }
 
 %new
 - (void)resumeTimer {
-    NSTimer *timer = [[self valueForKey:@"__updateTimer"] retain];
+    NSTimer *timer = [self valueForKey:@"__updateTimer"];
     NSDate *pauseDate = objc_getAssociatedObject(timer, (__bridge const void *)NSTimerPauseDate);
     NSDate *previousFireDate = objc_getAssociatedObject(timer, (__bridge const void *)NSTimerPreviousFireDate);
     const NSTimeInterval pauseTime = -[pauseDate timeIntervalSinceNow];
     timer.fireDate = [NSDate dateWithTimeInterval:pauseTime sinceDate:previousFireDate];
     NSDate *newStartDate = [NSDate dateWithTimeInterval:pauseTime sinceDate:[self valueForKey:@"__startTime"]];
-    [self setValue:[newStartDate retain] forKey:@"__startTime"];
-    [timer release];
+    [self setValue:newStartDate forKey:@"__startTime"];
 }
 
 %new
@@ -71,13 +68,12 @@
 }
 
 - (void)endTimer {
-    NSTimer *timer = [[self valueForKey:@"__updateTimer"] retain];
+    NSTimer *timer = [self valueForKey:@"__updateTimer"];
     if (timer == nil)
         return;
     objc_setAssociatedObject(timer, (__bridge const void *)(NSTimerPauseDate), nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(timer, (__bridge const void *)(NSTimerPreviousFireDate), nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [self updateUI:NO recording:NO];
-    [timer release];
     %orig;
 }
 
@@ -93,7 +89,6 @@
         UITapGestureRecognizer *togglePlayPause = [[UITapGestureRecognizer alloc] initWithTarget:target action:@selector(rp_togglePlayPause:)];
         togglePlayPause.numberOfTapsRequired = 1;
         [elapsedTimeView addGestureRecognizer:togglePlayPause];
-        [togglePlayPause release];
     }
 }
 
@@ -101,7 +96,7 @@
 
 %hook CAMViewfinderViewController
 
-%property(retain, nonatomic) UILongPressGestureRecognizer *rpGesture;
+%property (retain, nonatomic) UILongPressGestureRecognizer *rpGesture;
 
 - (void)_createShutterButtonIfNecessary {
     %orig;
@@ -166,7 +161,6 @@
     UITapGestureRecognizer *togglePlayPause = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(rp_togglePlayPause:)];
     togglePlayPause.numberOfTapsRequired = 1;
     [self._elapsedTimeView addGestureRecognizer:togglePlayPause];
-    [togglePlayPause release];
 }
 
 %end

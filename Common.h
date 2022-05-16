@@ -1,10 +1,6 @@
 #define UNRESTRICTED_AVAILABILITY
-#import "../PS.h"
-
-@interface CAMElapsedTimeView (Private)
-- (BOOL)usingBadgeAppearance;
-- (UIColor *)_backgroundRedColor;
-@end
+#import "../PSHeader/CameraApp/CameraApp.h"
+#import "../PSHeader/CameraMacros.h"
 
 @interface CAMElapsedTimeView (Addition)
 - (void)pauseTimer;
@@ -18,21 +14,16 @@
 - (void)resumeRecording;
 @end
 
-@interface CUCaptureController (Addition)
-- (BOOL)isCapturingCTMVideo;
-- (BOOL)isCapturingStandardVideo;
-@end
-
 @interface CAMFullscreenViewfinder : UIView
 - (CAMViewfinderViewController *)delegate;
 @end
 
-struct CAMShutterColor {
+typedef struct CAMShutterColor {
     CGFloat r;
     CGFloat g;
     CGFloat b;
     CGFloat a;
-};
+} CAMShutterColor;
 
 @interface CAMLiquidShutterRenderer : NSObject
 - (void)renderIfNecessary;
@@ -47,9 +38,5 @@ struct CAMShutterColor {
 - (CAMetalLayer *)metalLayer;
 @end
 
-#ifdef TWEAK
-
 NSString *NSTimerPauseDate = @"NSTimerPauseDate";
 NSString *NSTimerPreviousFireDate = @"NSTimerPreviousFireDate";
-
-#endif

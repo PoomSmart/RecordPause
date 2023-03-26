@@ -1,11 +1,10 @@
 Package: com.ps.recordpause
-Name: RecordPause (iOS 9+)
-Depends: mobilesubstrate, firmware (>= 9.0), ws.hbang.common (>= 1.2)
+Name: RecordPause
+Depends: mobilesubstrate, firmware (>= 9.0)
 Conflicts: org.thebigboss.recordpause, com.spicat.recordpause
 Version: 1.0.0
 Architecture: iphoneos-arm
 Description: Pause/resume video recording.
-Maintainer: SpicaT
-Author: SpicaT
+Maintainer: PoomSmart
+Author: PoomSmart
 Section: Tweaks
-Icon: file:///Library/PreferenceLoader/Preferences/RecordPause/RP@2x.png

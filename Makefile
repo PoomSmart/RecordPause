@@ -1,13 +1,4 @@
-ROOTLESS ?= 0
-
-ifeq ($(ROOTLESS),1)
-	TARGET = iphone:clang:latest:14.0
-	ARCHS = arm64 arm64e
-	THEOS_LAYOUT_DIR_NAME = layout-rootless
-	THEOS_PACKAGE_SCHEME = rootless
-else
-	TARGET = iphone:clang:latest:9.0
-endif
+TARGET = iphone:clang:latest:9.0
 PACKAGE_VERSION = 1.4.0
 
 INSTALL_TARGET_PROCESSES = Camera

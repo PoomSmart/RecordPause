@@ -1,0 +1,9 @@
+Package: com.ps.recordpause-rootless
+Name: RecordPause
+Depends: mobilesubstrate, firmware (>= 14.0)
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: Pause/resume video recording.
+Maintainer: PoomSmart
+Author: PoomSmart
+Section: Tweaks

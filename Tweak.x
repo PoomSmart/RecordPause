@@ -108,7 +108,7 @@
 
 - (void)_setCurrentGraphConfiguration:(CAMCaptureGraphConfiguration *)configuration {
     %orig;
-    self.rpGesture.enabled = configuration.mode == 1 || configuration.mode == 2 || configuration.mode == 6;
+    self.rpGesture.enabled = configuration.mode == 1 || configuration.mode == 2 || configuration.mode == 6 || configuration.mode == 7;
 }
 
 %new

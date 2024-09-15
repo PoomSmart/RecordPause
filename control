@@ -1,6 +1,6 @@
 Package: com.ps.recordpause
 Name: RecordPause
-Depends: mobilesubstrate, firmware (>= 9.0)
+Depends: mobilesubstrate, firmware (>= 14.0), firmware (<< 18.0)
 Conflicts: org.thebigboss.recordpause, com.spicat.recordpause
 Version: 1.0.0
 Architecture: iphoneos-arm

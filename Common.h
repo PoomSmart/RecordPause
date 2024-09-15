@@ -14,28 +14,33 @@
 - (void)resumeRecording;
 @end
 
-@interface CAMFullscreenViewfinder : UIView
-- (CAMViewfinderViewController *)delegate;
-@end
-
-typedef struct CAMShutterColor {
-    CGFloat r;
-    CGFloat g;
-    CGFloat b;
-    CGFloat a;
-} CAMShutterColor;
-
 @interface CAMLiquidShutterRenderer : NSObject
 - (void)renderIfNecessary;
 @end
 
-@interface CAMDynamicShutterControl : UIControl
-- (CAMShutterColor)_innerShapeColor;
-- (void)_updateRendererShapes;
+@interface UIView (Private)
+@property (assign, setter=_setShouldReverseLayoutDirection:, nonatomic) BOOL _shouldReverseLayoutDirection;
 @end
 
-@interface CAMMetalView : UIView
-- (CAMetalLayer *)metalLayer;
+extern CGRect UIRectIntegralWithScale(CGRect rect, CGFloat scale);
+extern CGFloat UIRoundToViewScale(CGFloat value, UIView *view);
+
+@interface CAMViewfinderViewController (Addition)
+@property (retain, nonatomic) UILongPressGestureRecognizer *rpGesture;
+@property (nonatomic, retain) CUShutterButton *_pauseResumeDuringVideoButton;
+- (void)_createPauseResumeDuringVideoButtonIfNecessary;
+- (void)_embedPauseResumeDuringVideoButtonWithLayoutStyle:(NSInteger)layoutStyle;
+- (void)_updatePauseResumeDuringVideoButton:(BOOL)paused;
+@end
+
+@interface CAMDynamicShutterControl (Addition)
+@property (nonatomic, retain) CUShutterButton *pauseResumeDuringVideoButton;
+@property (assign) BOOL overrideShutterButtonColor;
+@end
+
+@interface CAMBottomBar (Addition)
+@property (nonatomic, retain) CUShutterButton *pauseResumeDuringVideoButton;
+- (void)_layoutPauseResumeDuringVideoButtonForLayoutStyle:(NSInteger)layoutStyle;
 @end
 
 NSString *NSTimerPauseDate = @"NSTimerPauseDate";

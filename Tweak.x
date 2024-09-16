@@ -19,6 +19,18 @@ static void layoutPauseResumeDuringVideoButton(UIView *view, CUShutterButton *bu
     button.frame = [button frameForAlignmentRect:CGRectMake(x, y, rect.size.width, rect.size.height)];
 }
 
+static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *self) {
+    CAMCaptureGraphConfiguration *configuration = [self _currentGraphConfiguration];
+    if ([self respondsToSelector:@selector(_isSpatialVideoInVideoModeActiveForMode:devicePosition:)] && [self _isSpatialVideoInVideoModeActiveForMode:configuration.mode devicePosition:configuration.devicePosition])
+        return YES;
+    if (configuration.videoEncodingBehavior > 1)
+        return YES;
+    CUCaptureController *cuc = [self _captureController];
+    if ([cuc isCapturingCTMVideo])
+        return YES;
+    return [self _shouldHideStillDuringVideoButtonForGraphConfiguration:configuration];
+}
+
 %hook CAMDynamicShutterControl
 
 %property (nonatomic, retain) CUShutterButton *pauseResumeDuringVideoButton;
@@ -189,47 +201,46 @@ static void layoutPauseResumeDuringVideoButton(UIView *view, CUShutterButton *bu
 %new(v@:@)
 - (void)handlePauseResumeDuringVideoButtonPressed:(CUShutterButton *)button {
     CUCaptureController *cuc = [self _captureController];
-    if ([cuc isCapturingVideo]) {
-        CAMCaptureEngine *engine = [cuc _captureEngine];
-        CAMCaptureMovieFileOutput *movieOutput = [engine movieFileOutput];
-        if (movieOutput == nil)
-            return;
-        BOOL pause = ![movieOutput isRecordingPaused];
-        CAMElapsedTimeView *elapsedTimeView = self._elapsedTimeView;
-        if (elapsedTimeView == nil)
-            elapsedTimeView = [self.view valueForKey:@"_elapsedTimeView"];
-        [elapsedTimeView updateUI:pause recording:YES];
-        CUShutterButton *shutterButton = self._shutterButton;
-        CAMDynamicShutterControl *shutterControl = [self valueForKey:@"_dynamicShutterControl"];
-        if (shutterButton) {
-            UIColor *shutterColor = pause ? UIColor.systemYellowColor : ([shutterButton respondsToSelector:@selector(_innerCircleColorForMode:spinning:)] ? [shutterButton _innerCircleColorForMode:shutterButton.mode spinning:NO] : [shutterButton _colorForMode:shutterButton.mode]);
-            shutterButton._innerView.layer.backgroundColor = shutterColor.CGColor;
-        }
-        if (shutterControl) {
-            if (pause)
-                shutterControl.overrideShutterButtonColor = YES;
+    if ([cuc respondsToSelector:@selector(isCapturingCTMVideo)] && [cuc isCapturingCTMVideo]) return;
+    if (![cuc isCapturingVideo]) return;
+    CAMCaptureEngine *engine = [cuc _captureEngine];
+    CAMCaptureMovieFileOutput *movieOutput = [engine movieFileOutput];
+    if (movieOutput == nil) return;
+    BOOL pause = ![movieOutput isRecordingPaused];
+    CAMElapsedTimeView *elapsedTimeView = self._elapsedTimeView;
+    if (elapsedTimeView == nil)
+        elapsedTimeView = [self.view valueForKey:@"_elapsedTimeView"];
+    [elapsedTimeView updateUI:pause recording:YES];
+    CUShutterButton *shutterButton = self._shutterButton;
+    if (shutterButton) {
+        UIColor *shutterColor = pause ? UIColor.systemYellowColor : ([shutterButton respondsToSelector:@selector(_innerCircleColorForMode:spinning:)] ? [shutterButton _innerCircleColorForMode:shutterButton.mode spinning:NO] : [shutterButton _colorForMode:shutterButton.mode]);
+        shutterButton._innerView.layer.backgroundColor = shutterColor.CGColor;
+    }
+    CAMDynamicShutterControl *shutterControl = [self valueForKey:@"_dynamicShutterControl"];
+    if (shutterControl) {
+        if (pause)
+            shutterControl.overrideShutterButtonColor = YES;
+        [shutterControl _updateRendererShapes];
+        CAMLiquidShutterRenderer *renderer = [shutterControl valueForKey:@"_liquidShutterRenderer"];
+        if ([renderer respondsToSelector:@selector(renderIfNecessary)])
+            [renderer renderIfNecessary];
+        else if ([shutterControl respondsToSelector:@selector(_updateRendererShapes)])
             [shutterControl _updateRendererShapes];
-            CAMLiquidShutterRenderer *renderer = [shutterControl valueForKey:@"_liquidShutterRenderer"];
-            if ([renderer respondsToSelector:@selector(renderIfNecessary)])
-                [renderer renderIfNecessary];
-            else if ([shutterControl respondsToSelector:@selector(_updateRendererShapes)])
-                [shutterControl _updateRendererShapes];
-            shutterControl.overrideShutterButtonColor = NO;
-        }
-        [self _updatePauseResumeDuringVideoButton:pause];
-        if (pause) {
-            [elapsedTimeView pauseTimer];
-            [movieOutput pauseRecording];
-        } else {
-            [elapsedTimeView resumeTimer];
-            [movieOutput resumeRecording];
-        }
+        shutterControl.overrideShutterButtonColor = NO;
+    }
+    [self _updatePauseResumeDuringVideoButton:pause];
+    if (pause) {
+        [elapsedTimeView pauseTimer];
+        [movieOutput pauseRecording];
+    } else {
+        [elapsedTimeView resumeTimer];
+        [movieOutput resumeRecording];
     }
 }
 
 - (void)updateControlVisibilityAnimated:(BOOL)animated {
     %orig;
-    BOOL shouldHide = [self _shouldHideStillDuringVideoButtonForGraphConfiguration:[self _currentGraphConfiguration]];
+    BOOL shouldHide = shouldHidePauseResumeDuringVideoButton(self);
     self._pauseResumeDuringVideoButton.alpha = shouldHide ? 0 : 1;
     if (!shouldHide)
         [self _updatePauseResumeDuringVideoButton:NO];
@@ -237,7 +248,7 @@ static void layoutPauseResumeDuringVideoButton(UIView *view, CUShutterButton *bu
 
 - (void)_showControlsForGraphConfiguration:(CAMCaptureGraphConfiguration *)graphConfiguation animated:(BOOL)animated {
     %orig;
-    BOOL shouldHide = [self _shouldHideStillDuringVideoButtonForGraphConfiguration:[self _currentGraphConfiguration]];
+    BOOL shouldHide = shouldHidePauseResumeDuringVideoButton(self);
     self._pauseResumeDuringVideoButton.alpha = shouldHide ? 0 : 1;
     if (!shouldHide)
         [self _updatePauseResumeDuringVideoButton:NO];
@@ -245,7 +256,7 @@ static void layoutPauseResumeDuringVideoButton(UIView *view, CUShutterButton *bu
 
 - (void)_hideControlsForGraphConfiguration:(CAMCaptureGraphConfiguration *)graphConfiguation animated:(BOOL)animated {
     %orig;
-    BOOL shouldHide = [self _shouldHideStillDuringVideoButtonForGraphConfiguration:[self _currentGraphConfiguration]];
+    BOOL shouldHide = shouldHidePauseResumeDuringVideoButton(self);
     self._pauseResumeDuringVideoButton.alpha = shouldHide ? 0 : 1;
 }
 

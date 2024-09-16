@@ -19,7 +19,7 @@
 @end
 
 @interface UIView (Private)
-@property (assign, setter=_setShouldReverseLayoutDirection:, nonatomic) BOOL _shouldReverseLayoutDirection;
+@property (nonatomic, assign, setter=_setShouldReverseLayoutDirection:) BOOL _shouldReverseLayoutDirection;
 @end
 
 extern CGRect UIRectIntegralWithScale(CGRect rect, CGFloat scale);

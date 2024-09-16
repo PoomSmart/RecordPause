@@ -8,17 +8,13 @@ static void layoutPauseResumeDuringVideoButton(UIView *view, CUShutterButton *bu
     CGRect alignmentRect = [shutterButton alignmentRectForFrame:shutterButton.frame];
     CGFloat midY = CGRectGetMidY(alignmentRect);
     CGFloat y = UIRoundToViewScale(midY - (size.height / 2), view);
-    CGFloat offset, minX;
+    CGFloat x;
     CGRect bounds = view.bounds;
     BOOL layoutAtLeft = flip != [view _shouldReverseLayoutDirection];
-    if (layoutAtLeft) {
-        minX = CGRectGetMinX(bounds);
-        offset = 15;
-    } else {
-        minX = CGRectGetMaxX(bounds) - size.width;
-        offset = -15;
-    }
-    CGFloat x = minX + offset;
+    if (layoutAtLeft)
+        x = CGRectGetMinX(bounds) + 15;
+    else
+        x = CGRectGetMaxX(bounds) - size.width - 15;
     button.tappableEdgeInsets = UIEdgeInsetsMake(20, 20, 20, 20);
     button.frame = [button frameForAlignmentRect:CGRectMake(x, y, rect.size.width, rect.size.height)];
 }
@@ -235,12 +231,16 @@ static void layoutPauseResumeDuringVideoButton(UIView *view, CUShutterButton *bu
     %orig;
     BOOL shouldHide = [self _shouldHideStillDuringVideoButtonForGraphConfiguration:[self _currentGraphConfiguration]];
     self._pauseResumeDuringVideoButton.alpha = shouldHide ? 0 : 1;
+    if (!shouldHide)
+        [self _updatePauseResumeDuringVideoButton:NO];
 }
 
 - (void)_showControlsForGraphConfiguration:(CAMCaptureGraphConfiguration *)graphConfiguation animated:(BOOL)animated {
     %orig;
     BOOL shouldHide = [self _shouldHideStillDuringVideoButtonForGraphConfiguration:[self _currentGraphConfiguration]];
     self._pauseResumeDuringVideoButton.alpha = shouldHide ? 0 : 1;
+    if (!shouldHide)
+        [self _updatePauseResumeDuringVideoButton:NO];
 }
 
 - (void)_hideControlsForGraphConfiguration:(CAMCaptureGraphConfiguration *)graphConfiguation animated:(BOOL)animated {

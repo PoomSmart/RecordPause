@@ -2,7 +2,7 @@
 #import <UIKit/UIColor+Private.h>
 #import <UIKit/UIImage+Private.h>
 
-static void layoutPauseResumeDuringVideoButton(UIView *view, CUShutterButton *button, UIView *shutterButton, CGFloat displayScale, BOOL flip) {
+static void layoutPauseResumeDuringVideoButton(UIView *view, CUShutterButton *button, UIView *shutterButton, CGFloat displayScale, BOOL fixedPosition) {
     CGSize size = [button intrinsicContentSize];
     CGRect rect = UIRectIntegralWithScale(CGRectMake(0, 0, size.width, size.height), displayScale);
     CGRect alignmentRect = [shutterButton alignmentRectForFrame:shutterButton.frame];
@@ -10,8 +10,7 @@ static void layoutPauseResumeDuringVideoButton(UIView *view, CUShutterButton *bu
     CGFloat y = UIRoundToViewScale(midY - (size.height / 2), view);
     CGFloat x;
     CGRect bounds = view.bounds;
-    BOOL layoutAtLeft = flip != [view _shouldReverseLayoutDirection];
-    if (layoutAtLeft)
+    if ([view _shouldReverseLayoutDirection] || fixedPosition)
         x = CGRectGetMinX(bounds) + 15;
     else
         x = CGRectGetMaxX(bounds) - size.width - 15;

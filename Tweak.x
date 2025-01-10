@@ -76,7 +76,7 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
     [self setValue:newStartDate forKey:@"__startTime"];
 }
 
-%new(v@:BB)
+%new(v@:cc)
 - (void)updateUI:(BOOL)pause recording:(BOOL)recording {
     BOOL isBadgeStyle = [self respondsToSelector:@selector(usingBadgeAppearance)] && [self usingBadgeAppearance];
     UIColor *defaultColor = [self respondsToSelector:@selector(_backgroundRedColor)] ? [self _backgroundRedColor] : UIColor.redColor;
@@ -108,7 +108,7 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
 
 %property (nonatomic, retain) CUShutterButton *pauseResumeDuringVideoButton;
 
-%new(v@:q)
+%new(v@:l)
 - (void)_layoutPauseResumeDuringVideoButtonForLayoutStyle:(NSInteger)layoutStyle {
     if (![[self class] wantsVerticalBarForLayoutStyle:layoutStyle])
         layoutPauseResumeDuringVideoButton(self, self.pauseResumeDuringVideoButton, self.shutterButton, self.traitCollection.displayScale, NO);
@@ -136,7 +136,7 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
     [self _createPauseResumeDuringVideoButtonIfNecessary];
 }
 
-%new(v@:)
+%new(v@:c)
 - (void)_updatePauseResumeDuringVideoButton:(BOOL)paused {
     CUShutterButton *button = self._pauseResumeDuringVideoButton;
     UIView *innerView = button._innerView;
@@ -168,7 +168,7 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
     }
 }
 
-%new(v@:q)
+%new(v@:l)
 - (void)_embedPauseResumeDuringVideoButtonWithLayoutStyle:(NSInteger)layoutStyle {
     CUShutterButton *button = self._pauseResumeDuringVideoButton;
     BOOL shouldNotEmbed = layoutStyle == 2 ? YES : [self isEmulatingImagePicker];

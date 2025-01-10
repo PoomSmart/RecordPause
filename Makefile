@@ -1,5 +1,9 @@
+ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
+TARGET = iphone:clang:latest:15.0
+else
 TARGET = iphone:clang:latest:14.0
-PACKAGE_VERSION = 2.0.3
+endif
+PACKAGE_VERSION = 2.0.4
 
 INSTALL_TARGET_PROCESSES = Camera
 

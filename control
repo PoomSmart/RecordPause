@@ -1,6 +1,6 @@
 Package: com.ps.recordpause
 Name: RecordPause
-Depends: mobilesubstrate, firmware (>= 14.0), firmware (<< 18.0)
+Depends: mobilesubstrate, firmware (>= 13.0), firmware (<< 18.0)
 Conflicts: org.thebigboss.recordpause, com.spicat.recordpause
 Provides: org.thebigboss.recordpause, com.spicat.recordpause
 Replaces: org.thebigboss.recordpause, com.spicat.recordpause
@@ -10,3 +10,6 @@ Description: Pause/resume video recording in iOS Camera app.
 Maintainer: PoomSmart
 Author: PoomSmart
 Section: Tweaks
+Depiction: https://poomsmart.github.io/repo/depictions/recordpause.html
+SileoDepiction: https://poomsmart.github.io/repo/sileodepictions/recordpause.json
+

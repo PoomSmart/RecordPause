@@ -24,8 +24,7 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
         return YES;
     if (configuration.videoEncodingBehavior > 1)
         return YES;
-    CUCaptureController *cuc = [self _captureController];
-    if ([cuc isCapturingCTMVideo])
+    if ([[self _captureController] isCapturingCTMVideo])
         return YES;
     return [self _shouldHideStillDuringVideoButtonForGraphConfiguration:configuration];
 }
@@ -147,25 +146,24 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
 
 %new(v@:)
 - (void)_createPauseResumeDuringVideoButtonIfNecessary {
-    if (self._pauseResumeDuringVideoButton == nil) {
-        NSInteger layoutStyle = self._layoutStyle;
-        CUShutterButton *button = [%c(CUShutterButton) smallShutterButtonWithLayoutStyle:layoutStyle];
-        UIView *innerView = button._innerView;
-        UIImage *pauseImage = [UIImage systemImageNamed:@"pause.fill" withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:24]];
-        UIImageView *pauseIcon = [[UIImageView alloc] initWithImage:pauseImage];
-        pauseIcon.tintColor = UIColor.whiteColor;
-        pauseIcon.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        pauseIcon.contentMode = UIViewContentModeCenter;
-        pauseIcon.frame = innerView.bounds;
-        pauseIcon.tag = 2024;
-        [button addSubview:pauseIcon];
-        innerView.hidden = YES;
-        self._pauseResumeDuringVideoButton = button;
-        [button addTarget:self action:@selector(handlePauseResumeDuringVideoButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        button.mode = 1;
-        button.exclusiveTouch = YES;
-        [self _embedPauseResumeDuringVideoButtonWithLayoutStyle:layoutStyle];
-    }
+    if (self._pauseResumeDuringVideoButton) return;
+    NSInteger layoutStyle = self._layoutStyle;
+    CUShutterButton *button = [%c(CUShutterButton) smallShutterButtonWithLayoutStyle:layoutStyle];
+    UIView *innerView = button._innerView;
+    UIImage *pauseImage = [UIImage systemImageNamed:@"pause.fill" withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:24]];
+    UIImageView *pauseIcon = [[UIImageView alloc] initWithImage:pauseImage];
+    pauseIcon.tintColor = UIColor.whiteColor;
+    pauseIcon.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    pauseIcon.contentMode = UIViewContentModeCenter;
+    pauseIcon.frame = innerView.bounds;
+    pauseIcon.tag = 2024;
+    [button addSubview:pauseIcon];
+    innerView.hidden = YES;
+    self._pauseResumeDuringVideoButton = button;
+    [button addTarget:self action:@selector(handlePauseResumeDuringVideoButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    button.mode = 1;
+    button.exclusiveTouch = YES;
+    [self _embedPauseResumeDuringVideoButtonWithLayoutStyle:layoutStyle];
 }
 
 %new(v@:l)
@@ -245,7 +243,7 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
         [self _updatePauseResumeDuringVideoButton:NO];
 }
 
-- (void)_showControlsForGraphConfiguration:(CAMCaptureGraphConfiguration *)graphConfiguation animated:(BOOL)animated {
+- (void)_showControlsForGraphConfiguration:(CAMCaptureGraphConfiguration *)graphConfiguration animated:(BOOL)animated {
     %orig;
     BOOL shouldHide = shouldHidePauseResumeDuringVideoButton(self);
     self._pauseResumeDuringVideoButton.alpha = shouldHide ? 0 : 1;
@@ -253,7 +251,7 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
         [self _updatePauseResumeDuringVideoButton:NO];
 }
 
-- (void)_hideControlsForGraphConfiguration:(CAMCaptureGraphConfiguration *)graphConfiguation animated:(BOOL)animated {
+- (void)_hideControlsForGraphConfiguration:(CAMCaptureGraphConfiguration *)graphConfiguration animated:(BOOL)animated {
     %orig;
     BOOL shouldHide = shouldHidePauseResumeDuringVideoButton(self);
     self._pauseResumeDuringVideoButton.alpha = shouldHide ? 0 : 1;

@@ -24,7 +24,8 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
         return YES;
     if (configuration.videoEncodingBehavior > 1)
         return YES;
-    if ([[self _captureController] isCapturingCTMVideo])
+    CUCaptureController *cuc = [self _captureController];
+    if ([cuc respondsToSelector:@selector(isCapturingCTMVideo)] && [cuc isCapturingCTMVideo])
         return YES;
     return [self _shouldHideStillDuringVideoButtonForGraphConfiguration:configuration];
 }
@@ -32,7 +33,7 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
 %hook CAMDynamicShutterControl
 
 %property (nonatomic, retain) CUShutterButton *pauseResumeDuringVideoButton;
-%property (assign) BOOL overrideShutterButtonColor;
+%property (nonatomic, assign) BOOL overrideShutterButtonColor;
 
 - (CAMShutterColor)_innerShapeColor {
     CAMShutterColor color = %orig;
@@ -75,19 +76,23 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
     [self setValue:newStartDate forKey:@"__startTime"];
 }
 
-%new(v@:cc)
+%new(v@:BB)
 - (void)updateUI:(BOOL)pause recording:(BOOL)recording {
     BOOL isBadgeStyle = [self respondsToSelector:@selector(usingBadgeAppearance)] && [self usingBadgeAppearance];
     UIColor *defaultColor = [self respondsToSelector:@selector(_backgroundRedColor)] ? [self _backgroundRedColor] : UIColor.redColor;
-    UIImageView *backgroundView = [self valueForKey:@"_backgroundView"];
+    UIImageView *backgroundView = nil;
+    @try {
+        backgroundView = [self valueForKey:@"_backgroundView"];
+    } @catch (NSException *exception) {}
     if (isBadgeStyle) {
         backgroundView.tintColor = pause ? UIColor.systemYellowColor : (recording ? defaultColor : UIColor.clearColor);
     } else {
+        UIColor *recordingImageColor = pause ? UIColor.systemYellowColor : defaultColor;
         self._timeLabel.textColor = pause ? UIColor.systemYellowColor : UIColor.whiteColor;
         if ([self respondsToSelector:@selector(_recordingImageView)] && self._recordingImageView)
-            self._recordingImageView.image = [self._recordingImageView.image _flatImageWithColor:pause ? UIColor.systemYellowColor : defaultColor];
+            self._recordingImageView.image = [self._recordingImageView.image _flatImageWithColor:recordingImageColor];
         if (backgroundView)
-            backgroundView.image = [backgroundView.image _flatImageWithColor:pause ? UIColor.systemYellowColor : defaultColor];
+            backgroundView.image = [backgroundView.image _flatImageWithColor:recordingImageColor];
     }
 }
 
@@ -135,7 +140,7 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
     [self _createPauseResumeDuringVideoButtonIfNecessary];
 }
 
-%new(v@:c)
+%new(v@:B)
 - (void)_updatePauseResumeDuringVideoButton:(BOOL)paused {
     CUShutterButton *button = self._pauseResumeDuringVideoButton;
     UIView *innerView = button._innerView;
@@ -150,7 +155,13 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
     NSInteger layoutStyle = self._layoutStyle;
     CUShutterButton *button = [%c(CUShutterButton) smallShutterButtonWithLayoutStyle:layoutStyle];
     UIView *innerView = button._innerView;
-    UIImage *pauseImage = [UIImage systemImageNamed:@"pause.fill" withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:24]];
+    UIImage *pauseImage;
+    if (@available(iOS 13.0, *)) {
+        pauseImage = [UIImage systemImageNamed:@"pause.fill" withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:24]];
+    } else {
+        NSBundle *bundle = [NSBundle bundleWithPath:@"/Library/Application Support/RecordPause.bundle"];
+        pauseImage = [UIImage imageNamed:@"pause.fill" inBundle:bundle compatibleWithTraitCollection:nil];
+    }
     UIImageView *pauseIcon = [[UIImageView alloc] initWithImage:pauseImage];
     pauseIcon.tintColor = UIColor.whiteColor;
     pauseIcon.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -170,7 +181,7 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
 - (void)_embedPauseResumeDuringVideoButtonWithLayoutStyle:(NSInteger)layoutStyle {
     CUShutterButton *button = self._pauseResumeDuringVideoButton;
     BOOL shouldNotEmbed = layoutStyle == 2 ? YES : [self isEmulatingImagePicker];
-    if ([self _shouldCreateAndEmbedControls]) {
+    if ([self respondsToSelector:@selector(_shouldCreateAndEmbedControls)] ? [self _shouldCreateAndEmbedControls] : YES) {
         CAMBottomBar *bottomBar = self.viewfinderView.bottomBar;
         if (!shouldNotEmbed) {
             CUShutterButton *existingButton = bottomBar.pauseResumeDuringVideoButton;
@@ -213,7 +224,10 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
         UIColor *shutterColor = pause ? UIColor.systemYellowColor : ([shutterButton respondsToSelector:@selector(_innerCircleColorForMode:spinning:)] ? [shutterButton _innerCircleColorForMode:shutterButton.mode spinning:NO] : [shutterButton _colorForMode:shutterButton.mode]);
         shutterButton._innerView.layer.backgroundColor = shutterColor.CGColor;
     }
-    CAMDynamicShutterControl *shutterControl = [self valueForKey:@"_dynamicShutterControl"];
+    CAMDynamicShutterControl *shutterControl = nil;
+    @try {
+        shutterControl = [self valueForKey:@"_dynamicShutterControl"];
+    } @catch (NSException *exception) {}
     if (shutterControl) {
         if (pause)
             shutterControl.overrideShutterButtonColor = YES;

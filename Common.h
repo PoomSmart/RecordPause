@@ -35,7 +35,7 @@ extern CGFloat UIRoundToViewScale(CGFloat value, UIView *view);
 
 @interface CAMDynamicShutterControl (Addition)
 @property (nonatomic, retain) CUShutterButton *pauseResumeDuringVideoButton;
-@property (assign) BOOL overrideShutterButtonColor;
+@property (nonatomic, assign) BOOL overrideShutterButtonColor;
 @end
 
 @interface CAMBottomBar (Addition)

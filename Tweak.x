@@ -19,15 +19,23 @@ static void layoutPauseResumeDuringVideoButton(UIView *view, CUShutterButton *bu
 }
 
 static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *self) {
-    CAMCaptureGraphConfiguration *configuration = [self _currentGraphConfiguration];
-    if ([self respondsToSelector:@selector(_isSpatialVideoInVideoModeActiveForMode:devicePosition:)] && [self _isSpatialVideoInVideoModeActiveForMode:configuration.mode devicePosition:configuration.devicePosition])
-        return YES;
-    if (configuration.videoEncodingBehavior > 1)
-        return YES;
+    CAMCaptureGraphConfiguration *configuration = nil;
+    if ([self respondsToSelector:@selector(_currentGraphConfiguration)]) {
+        configuration = [self _currentGraphConfiguration];
+        if ([self respondsToSelector:@selector(_isSpatialVideoInVideoModeActiveForMode:devicePosition:)] && [self _isSpatialVideoInVideoModeActiveForMode:configuration.mode devicePosition:configuration.devicePosition])
+            return YES;
+        if (configuration.videoEncodingBehavior > 1)
+            return YES;
+    }
     CUCaptureController *cuc = [self _captureController];
     if ([cuc respondsToSelector:@selector(isCapturingCTMVideo)] && [cuc isCapturingCTMVideo])
         return YES;
-    return [self _shouldHideStillDuringVideoButtonForGraphConfiguration:configuration];
+    if (configuration)
+        return [self _shouldHideStillDuringVideoButtonForGraphConfiguration:configuration];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return [self _shouldHideStillDuringVideoButtonForMode:self._currentMode device:self._currentDevice];
+#pragma clang diagnostic pop
 }
 
 %hook CAMDynamicShutterControl
@@ -124,9 +132,24 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
     }
 }
 
+%new(v@:@)
+- (void)_layoutPauseResumeDuringVideoButtonForTraitCollection:(UITraitCollection *)traitCollection {
+    if (![[self class] wantsVerticalBarForTraitCollection:traitCollection])
+        layoutPauseResumeDuringVideoButton(self, self.pauseResumeDuringVideoButton, self.shutterButton, traitCollection.displayScale, NO);
+    else {
+        CGRect frame = self.frame;
+        CGFloat maxY = CGRectGetMaxY(frame) - (2 * (BUTTON_SIZE + 16.0));
+        CGFloat midX = CGRectGetWidth(frame) / 2 - (BUTTON_SIZE / 2);
+        self.pauseResumeDuringVideoButton.frame = CGRectMake(midX, maxY, BUTTON_SIZE, BUTTON_SIZE);
+    }
+}
+
 - (void)layoutSubviews {
     %orig;
-    [self _layoutPauseResumeDuringVideoButtonForLayoutStyle:[self layoutStyle]];
+    if ([self respondsToSelector:@selector(layoutStyle)])
+        [self _layoutPauseResumeDuringVideoButtonForLayoutStyle:[self layoutStyle]];
+    else
+        [self _layoutPauseResumeDuringVideoButtonForTraitCollection:self.traitCollection];
 }
 
 %end
@@ -152,8 +175,11 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
 %new(v@:)
 - (void)_createPauseResumeDuringVideoButtonIfNecessary {
     if (self._pauseResumeDuringVideoButton) return;
-    NSInteger layoutStyle = self._layoutStyle;
-    CUShutterButton *button = [%c(CUShutterButton) smallShutterButtonWithLayoutStyle:layoutStyle];
+    NSInteger layoutStyle = [self respondsToSelector:@selector(_layoutStyle)] ? self._layoutStyle : 1;
+    Class CUShutterButtonClass = %c(CUShutterButton);
+    CUShutterButton *button = [CUShutterButtonClass respondsToSelector:@selector(smallShutterButtonWithLayoutStyle:)]
+        ? [CUShutterButtonClass smallShutterButtonWithLayoutStyle:layoutStyle]
+        : [CUShutterButtonClass smallShutterButton];
     UIView *innerView = button._innerView;
     UIImage *pauseImage;
     if (@available(iOS 13.0, *)) {
@@ -180,7 +206,7 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
 %new(v@:l)
 - (void)_embedPauseResumeDuringVideoButtonWithLayoutStyle:(NSInteger)layoutStyle {
     CUShutterButton *button = self._pauseResumeDuringVideoButton;
-    BOOL shouldNotEmbed = layoutStyle == 2 ? YES : [self isEmulatingImagePicker];
+    BOOL shouldNotEmbed = layoutStyle == 2 ? YES : ([self respondsToSelector:@selector(isEmulatingImagePicker)] ? [self isEmulatingImagePicker] : NO);
     if ([self respondsToSelector:@selector(_shouldCreateAndEmbedControls)] ? [self _shouldCreateAndEmbedControls] : YES) {
         CAMBottomBar *bottomBar = self.viewfinderView.bottomBar;
         if (!shouldNotEmbed) {
@@ -265,7 +291,21 @@ static BOOL shouldHidePauseResumeDuringVideoButton(CAMViewfinderViewController *
         [self _updatePauseResumeDuringVideoButton:NO];
 }
 
+- (void)_showControlsForMode:(NSInteger)mode device:(NSInteger)device animated:(BOOL)animated {
+    %orig;
+    BOOL shouldHide = shouldHidePauseResumeDuringVideoButton(self);
+    self._pauseResumeDuringVideoButton.alpha = shouldHide ? 0 : 1;
+    if (!shouldHide)
+        [self _updatePauseResumeDuringVideoButton:NO];
+}
+
 - (void)_hideControlsForGraphConfiguration:(CAMCaptureGraphConfiguration *)graphConfiguration animated:(BOOL)animated {
+    %orig;
+    BOOL shouldHide = shouldHidePauseResumeDuringVideoButton(self);
+    self._pauseResumeDuringVideoButton.alpha = shouldHide ? 0 : 1;
+}
+
+- (void)_hideControlsForMode:(NSInteger)mode device:(NSInteger)device animated:(BOOL)animated {
     %orig;
     BOOL shouldHide = shouldHidePauseResumeDuringVideoButton(self);
     self._pauseResumeDuringVideoButton.alpha = shouldHide ? 0 : 1;

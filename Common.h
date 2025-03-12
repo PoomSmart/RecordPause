@@ -41,6 +41,7 @@ extern CGFloat UIRoundToViewScale(CGFloat value, UIView *view);
 @interface CAMBottomBar (Addition)
 @property (nonatomic, retain) CUShutterButton *pauseResumeDuringVideoButton;
 - (void)_layoutPauseResumeDuringVideoButtonForLayoutStyle:(NSInteger)layoutStyle;
+- (void)_layoutPauseResumeDuringVideoButtonForTraitCollection:(UITraitCollection *)traitCollection;
 @end
 
 NSString *NSTimerPauseDate = @"NSTimerPauseDate";

@@ -1,7 +1,7 @@
 ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
 TARGET = iphone:clang:latest:15.0
 else
-TARGET = iphone:clang:14.5:11.0
+TARGET = iphone:clang:14.5:9.0
 export PREFIX = $(THEOS)/toolchain/Xcode11.xctoolchain/usr/bin/
 endif
 
